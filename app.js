@@ -175,6 +175,21 @@
     ];
   }
 
+  function parseChannel(s) {
+    const m = /^\d{1,3}$/.exec((s || '').trim());
+    if (!m) return null;
+    const n = Number(m[0]);
+    return n >= 0 && n <= 255 ? n : null;
+  }
+
+  function readRgbInputs() {
+    const r = parseChannel($('rInput').value);
+    const g = parseChannel($('gInput').value);
+    const b = parseChannel($('bInput').value);
+    if (r == null || g == null || b == null) return null;
+    return [r, g, b];
+  }
+
   const MAX_DIST = Math.sqrt(3) * 255;
 
   function possibleRanges({ value: v, result, band }) {
@@ -436,34 +451,47 @@
     $('submitGuess').disabled = state.done;
   }
 
-  function syncFromPicker() {
-    const v = $('colorPicker').value;
-    $('hexInput').value = v;
-    $('hexInput').classList.remove('invalid');
-    $('guessPreview').style.background = v;
-  }
+  const RGB_IDS = ['rInput', 'gInput', 'bInput'];
 
-  function syncFromHex() {
-    const raw = $('hexInput').value;
-    const rgb = parseHex(raw);
-    if (rgb) {
-      const hex = rgbToHex(rgb);
-      $('colorPicker').value = hex;
-      $('guessPreview').style.background = hex;
-      $('hexInput').classList.remove('invalid');
-    } else {
-      $('hexInput').classList.add('invalid');
+  function setGuess(rgb, origin) {
+    const hex = rgbToHex(rgb);
+    if (origin !== 'picker') $('colorPicker').value = hex;
+    if (origin !== 'hex') $('hexInput').value = hex;
+    if (origin !== 'rgb') {
+      RGB_IDS.forEach((id, i) => { $(id).value = String(rgb[i]); });
     }
+    $('guessPreview').style.background = hex;
+    $('hexInput').classList.remove('invalid');
+    RGB_IDS.forEach((id) => $(id).classList.remove('invalid'));
   }
 
-  $('colorPicker').addEventListener('input', syncFromPicker);
-  $('hexInput').addEventListener('input', syncFromHex);
-  $('hexInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') submitGuess();
+  $('colorPicker').addEventListener('input', () => {
+    const rgb = parseHex($('colorPicker').value);
+    if (rgb) setGuess(rgb, 'picker');
   });
+
+  $('hexInput').addEventListener('input', () => {
+    const rgb = parseHex($('hexInput').value);
+    if (rgb) setGuess(rgb, 'hex');
+    else $('hexInput').classList.add('invalid');
+  });
+
+  RGB_IDS.forEach((id) => {
+    const el = $(id);
+    el.addEventListener('input', () => {
+      const rgb = readRgbInputs();
+      if (rgb) setGuess(rgb, 'rgb');
+      else el.classList.add('invalid');
+    });
+  });
+
+  const submitOnEnter = (e) => { if (e.key === 'Enter') submitGuess(); };
+  $('hexInput').addEventListener('keydown', submitOnEnter);
+  RGB_IDS.forEach((id) => $(id).addEventListener('keydown', submitOnEnter));
+
   $('submitGuess').addEventListener('click', submitGuess);
   $('newGame').addEventListener('click', newGame);
 
-  syncFromPicker();
+  setGuess(parseHex($('colorPicker').value), 'picker');
   newGame();
 })();

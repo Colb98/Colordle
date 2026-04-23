@@ -58,8 +58,22 @@ input[type="number"] { width: 4.5rem; }
 input[type="text"] {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   width: 7rem;
-  text-transform: lowercase;
 }
+#hexInput { text-transform: lowercase; }
+
+.rgb-group {
+  display: flex;
+  gap: 0.25rem;
+}
+.rgb-group input {
+  width: 3.2rem;
+  text-align: center;
+  padding: 0.45rem 0.35rem;
+}
+.rgb-group input:nth-child(1) { box-shadow: inset 0 -2px 0 #d64545; }
+.rgb-group input:nth-child(2) { box-shadow: inset 0 -2px 0 #3ed06b; }
+.rgb-group input:nth-child(3) { box-shadow: inset 0 -2px 0 #4d88ff; }
+
 input[type="text"].invalid { border-color: #c44; }
 
 button {

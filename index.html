@@ -29,7 +29,15 @@
     <section class="input">
       <input type="color" id="colorPicker" value="#808080" aria-label="Pick a color">
       <input type="text" id="hexInput" value="#808080" maxlength="7" spellcheck="false"
-             aria-label="Hex color (e.g. #aabbcc)">
+             aria-label="Hex color (e.g. #aabbcc)" placeholder="#rrggbb">
+      <div class="rgb-group" role="group" aria-label="RGB values">
+        <input type="text" id="rInput" value="128" maxlength="3"
+               inputmode="numeric" pattern="[0-9]*" aria-label="Red (0-255)">
+        <input type="text" id="gInput" value="128" maxlength="3"
+               inputmode="numeric" pattern="[0-9]*" aria-label="Green (0-255)">
+        <input type="text" id="bInput" value="128" maxlength="3"
+               inputmode="numeric" pattern="[0-9]*" aria-label="Blue (0-255)">
+      </div>
       <div class="guess-preview" id="guessPreview" aria-label="Current guess preview"></div>
       <button id="submitGuess" type="button">Guess</button>
     </section>
