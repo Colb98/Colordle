@@ -15,6 +15,76 @@
   };
 
   const randInt256 = () => Math.floor(Math.random() * 256);
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  const MESSAGES = {
+    one: [
+      "Cheating?",
+      "Are you a bot? Bots get banned.",
+      "Suspicious. Highly suspicious.",
+      "Nobody does that. Nobody.",
+      "Lucky guess. Or witchcraft.",
+      "One shot, one kill.",
+      "I'm calling the referee.",
+      "Statistically implausible.",
+      "Did you peek at the source?",
+      "Hex vision confirmed.",
+    ],
+    prodigy: [
+      "Chromatic prodigy.",
+      "Eagle-eyed.",
+      "Masterful.",
+      "Pantone's secret child?",
+      "Prodigious.",
+      "Uncanny color sense.",
+      "Effortless.",
+      "The retina remembers.",
+    ],
+    solid: [
+      "Solidly done.",
+      "Nailed it.",
+      "Pigment whisperer.",
+      "Respectable showing.",
+      "Handsomely played.",
+      "Smooth.",
+      "Tidy work.",
+    ],
+    scenic: [
+      "Got there eventually.",
+      "Scenic route, but you arrived.",
+      "Patience pays.",
+      "A bit meandering, but a win.",
+      "Victory, however ragged.",
+      "Earned every pixel of that.",
+    ],
+    tight: [
+      "Dramatic finish.",
+      "You like living dangerously.",
+      "Close one.",
+      "Nearly a tragedy.",
+      "A whisker from the void.",
+    ],
+    last: [
+      "Phew!",
+      "By the skin of your teeth.",
+      "Clutch.",
+      "On fumes.",
+      "Heart attack narrowly avoided.",
+      "Graceless — but a win.",
+      "The last breath saved you.",
+      "Cut it finer next time, will you?",
+    ],
+  };
+
+  function successMessage(guesses, max) {
+    if (guesses === 1) return pick(MESSAGES.one);
+    if (guesses === max) return pick(MESSAGES.last);
+    if (max >= 4 && guesses === max - 1) return pick(MESSAGES.tight);
+    const ratio = guesses / max;
+    if (ratio <= 0.34) return pick(MESSAGES.prodigy);
+    if (ratio <= 0.67) return pick(MESSAGES.solid);
+    return pick(MESSAGES.scenic);
+  }
 
   const rgbToHex = ([r, g, b]) =>
     '#' + [r, g, b].map((n) => n.toString(16).padStart(2, '0')).join('');
@@ -92,7 +162,16 @@
   }
 
   function render() {
-    $('targetSwatch').style.background = rgbToHex(state.target);
+    const swatch = $('targetSwatch');
+    if (state.done) {
+      swatch.style.background = rgbToHex(state.target);
+      swatch.textContent = '';
+      swatch.classList.remove('hidden');
+    } else {
+      swatch.style.background = '';
+      swatch.textContent = '?';
+      swatch.classList.add('hidden');
+    }
     $('guessCount').textContent = state.guesses.length;
     $('maxGuessesLabel').textContent = state.maxGuesses;
 
@@ -132,8 +211,11 @@
       const hex = rgbToHex(state.target);
       const [r, g, b] = state.target;
       if (state.won) {
+        const n = state.guesses.length;
+        const msg = successMessage(n, state.maxGuesses);
+        const tally = n === 1 ? "1 guess" : `${n} guesses`;
         result.innerHTML =
-          `<h2>You got it!</h2><p>${hex} &nbsp;(${r}, ${g}, ${b}) in ${state.guesses.length} ${state.guesses.length === 1 ? 'guess' : 'guesses'}.</p>`;
+          `<h2>${msg}</h2><p>${hex} &nbsp;(${r}, ${g}, ${b}) in ${tally}.</p>`;
       } else {
         result.innerHTML =
           `<h2>Out of guesses</h2><p>The color was <span class="reveal" style="background:${hex}"></span> <strong>${hex}</strong> (${r}, ${g}, ${b}).</p>`;
