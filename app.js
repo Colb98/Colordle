@@ -74,32 +74,57 @@
       "The last breath saved you.",
       "Cut it finer next time, will you?",
     ],
-    lose: [
-      "Close, but no pigment.",
-      "The spectrum wins this round.",
-      "So near, so far.",
-      "Defeated by a swatch.",
-      "The palette mocks you.",
-      "Chromatically outmatched.",
-      "RGB: Really Got Bested.",
-      "The hex had the last laugh.",
-      "A noble attempt, in vain.",
-      "Even Monet had off days.",
-      "Crashed on the color wheel.",
-      "Not every hue wants to be found.",
-      "Pixel defeat.",
-      "The color slipped into the void.",
-      "Rods and cones: revolt.",
-      "Outfoxed by six little digits.",
-    ],
-    heartbreak: [
-      "Two out of three is a real kick in the teeth.",
-      "Painful. Genuinely painful.",
-      "So close the pixels could taste it.",
-      "A tragedy in three channels.",
-      "The universe is cruel today.",
+    loseAlmost: [
+      "Almost!!",
+      "Painfully close.",
+      "A single pixel away.",
+      "Oh, so nearly.",
+      "Cruel. Just cruel.",
+      "Practically had it.",
+      "Within arm's reach.",
+      "Could taste it.",
       "Heartbreak hex.",
       "That one will sting for a while.",
+    ],
+    loseWarm: [
+      "Tantalizing.",
+      "Warm. Very warm.",
+      "Knocking on the door.",
+      "The color winked and left.",
+      "So near, so far.",
+      "Close, but no pigment.",
+    ],
+    loseClose: [
+      "Respectable, but no cigar.",
+      "In the neighbourhood.",
+      "The palette had other ideas.",
+      "Good hunting, wrong quarry.",
+      "Circling the right hue.",
+    ],
+    loseMid: [
+      "Somewhere in the ballpark.",
+      "You and the color are roughly acquainted.",
+      "Middling effort.",
+      "A passing familiarity at best.",
+      "Chromatically adjacent.",
+    ],
+    loseFar: [
+      "Spectrum mismatch.",
+      "A different hue altogether.",
+      "The wheel keeps turning.",
+      "Noted attempt. Wrong territory.",
+      "Cold.",
+      "Outfoxed by six little digits.",
+    ],
+    loseAwful: [
+      "Not even close.",
+      "Were you trying?",
+      "Chromatic amnesia.",
+      "Are we looking at the same colors?",
+      "Hexual identity crisis.",
+      "The void consumed your guess.",
+      "Diametrically opposed.",
+      "You picked the opposite corner of the cube, friend.",
     ],
   };
 
@@ -113,16 +138,26 @@
     return pick(MESSAGES.scenic);
   }
 
-  function failMessage(guesses) {
-    const last = guesses[guesses.length - 1];
-    if (last) {
-      const exacts = last.channels.filter((c) => c.result === 'exact').length;
-      const nearly = last.channels.filter(
-        (c) => c.result === 'exact' || c.result === 'green',
-      ).length;
-      if (exacts >= 2 || nearly === 3) return pick(MESSAGES.heartbreak);
-    }
-    return pick(MESSAGES.lose);
+  function bestGuess(guesses, target) {
+    let best = null;
+    let bestPct = -1;
+    guesses.forEach((g, idx) => {
+      const pct = nearnessPct(g.rgb, target);
+      if (pct > bestPct) {
+        bestPct = pct;
+        best = { guess: g, pct, idx };
+      }
+    });
+    return best;
+  }
+
+  function failMessage(bestPct) {
+    if (bestPct >= 95) return pick(MESSAGES.loseAlmost);
+    if (bestPct >= 85) return pick(MESSAGES.loseWarm);
+    if (bestPct >= 70) return pick(MESSAGES.loseClose);
+    if (bestPct >= 50) return pick(MESSAGES.loseMid);
+    if (bestPct >= 25) return pick(MESSAGES.loseFar);
+    return pick(MESSAGES.loseAwful);
   }
 
   const rgbToHex = ([r, g, b]) =>
@@ -141,6 +176,30 @@
   }
 
   const MAX_DIST = Math.sqrt(3) * 255;
+
+  function possibleRanges({ value: v, result, band }) {
+    if (result === 'exact') return [[v, v]];
+    if (result === 'green') {
+      const g = Math.max(0, Math.floor(band.green));
+      return [[Math.max(0, v - g), Math.min(255, v + g)]];
+    }
+    if (result === 'yellow') {
+      const y = Math.max(0, Math.floor(band.yellow));
+      return [[Math.max(0, v - y), Math.min(255, v + y)]];
+    }
+    // red: outside the yellow band at both ends
+    const y = Math.max(0, Math.floor(band.yellow));
+    const out = [];
+    if (v - y - 1 >= 0) out.push([0, v - y - 1]);
+    if (v + y + 1 <= 255) out.push([v + y + 1, 255]);
+    return out;
+  }
+
+  function rangesLabel(ranges) {
+    return ranges
+      .map(([lo, hi]) => (lo === hi ? `${lo}` : `${lo}–${hi}`))
+      .join(' or ');
+  }
 
   function nearnessPct(guess, target) {
     const dr = guess[0] - target[0];
@@ -290,32 +349,48 @@
       const channels = document.createElement('div');
       channels.className = 'channels';
       g.channels.forEach((c, i) => {
+        const letter = CHANNEL_NAMES[i];
+        const slot = document.createElement('div');
+        slot.className = `cchan c${letter.toLowerCase()}`;
+
         const block = document.createElement('span');
         block.className = `channel ${c.result}`;
 
         const main = document.createElement('span');
         main.className = 'channel-main';
-        main.textContent = `${CHANNEL_NAMES[i]}:${c.result === 'exact' ? '✓' : c.value}`;
+        main.textContent = `${letter}:${c.result === 'exact' ? '✓' : c.value}`;
         block.appendChild(main);
 
         const caption = document.createElement('span');
         caption.className = 'channel-range';
-        if (c.result === 'exact') {
-          caption.textContent = 'exact';
-        } else {
-          const g0 = Math.max(0, Math.floor(c.band.green));
-          const y0 = Math.max(0, Math.floor(c.band.yellow));
-          caption.textContent = `≤${g0} | ≤${y0}`;
-        }
+        const gN = Math.max(0, Math.floor(c.band.green));
+        const yN = Math.max(0, Math.floor(c.band.yellow));
+        if (c.result === 'exact') caption.textContent = 'exact';
+        else if (c.result === 'green') caption.textContent = `Δ ≤ ${gN}`;
+        else if (c.result === 'yellow') caption.textContent = `Δ ≤ ${yN}`;
+        else caption.textContent = `Δ > ${yN}`;
         block.appendChild(caption);
 
-        const g0 = Math.max(0, Math.floor(c.band.green));
-        const y0 = Math.max(0, Math.floor(c.band.yellow));
         block.title =
-          `${CHANNEL_NAMES[i]} = ${c.value}   Δ = ${c.delta}\n` +
-          `Ranges at this guess: green ≤${g0}, yellow ≤${y0}, red >${y0}`;
+          `${letter} = ${c.value}   Δ = ${c.delta}\n` +
+          `Ranges at this guess: green ≤${gN}, yellow ≤${yN}, red >${yN}`;
 
-        channels.appendChild(block);
+        slot.appendChild(block);
+
+        const ranges = possibleRanges(c);
+        const bar = document.createElement('div');
+        bar.className = 'cbar';
+        ranges.forEach(([lo, hi]) => {
+          const fill = document.createElement('span');
+          fill.className = 'cbar-fill';
+          fill.style.left = `${(lo / 255) * 100}%`;
+          fill.style.width = `${Math.max(0.6, ((hi - lo) / 255) * 100)}%`;
+          bar.appendChild(fill);
+        });
+        bar.title = `${letter} target ∈ ${rangesLabel(ranges)}`;
+        slot.appendChild(bar);
+
+        channels.appendChild(slot);
       });
       row.appendChild(channels);
 
@@ -345,9 +420,15 @@
         result.innerHTML =
           `<h2>${msg}</h2><p>${hex} &nbsp;(${r}, ${g}, ${b}) in ${tally}.</p>`;
       } else {
-        const msg = failMessage(state.guesses);
+        const best = bestGuess(state.guesses, state.target);
+        const msg = failMessage(best.pct);
+        const bhex = rgbToHex(best.guess.rgb);
         result.innerHTML =
-          `<h2>${msg}</h2><p>The color was <span class="reveal" style="background:${hex}"></span> <strong>${hex}</strong> (${r}, ${g}, ${b}).</p>`;
+          `<h2>${msg}</h2>` +
+          `<p>The color was <span class="reveal" style="background:${hex}"></span> <strong>${hex}</strong> (${r}, ${g}, ${b}).</p>` +
+          `<p class="best-line">Your best guess (#${best.idx + 1}): ` +
+          `<span class="reveal" style="background:${bhex}"></span> <strong>${bhex}</strong> — ` +
+          `<span class="best-pct" style="background:hsl(${best.pct * 1.2}, 58%, 38%)">${best.pct}%</span></p>`;
       }
     } else {
       result.hidden = true;
