@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Colordle</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Colordle</h1>
+      <div class="controls">
+        <label>
+          Max guesses
+          <input type="number" id="maxGuesses" value="6" min="1" max="50">
+        </label>
+        <button id="newGame" type="button">New puzzle</button>
+      </div>
+    </header>
+
+    <section class="target">
+      <div class="swatch" id="targetSwatch" aria-label="Target color"></div>
+      <p class="counter">
+        Guess <span id="guessCount">0</span> / <span id="maxGuessesLabel">6</span>
+      </p>
+    </section>
+
+    <section class="input">
+      <input type="color" id="colorPicker" value="#808080" aria-label="Pick a color">
+      <input type="text" id="hexInput" value="#808080" maxlength="7" spellcheck="false"
+             aria-label="Hex color (e.g. #aabbcc)">
+      <div class="guess-preview" id="guessPreview" aria-label="Current guess preview"></div>
+      <button id="submitGuess" type="button">Guess</button>
+    </section>
+
+    <section class="history" id="history" aria-live="polite"></section>
+
+    <section class="result" id="result" hidden></section>
+
+    <footer>
+      <p class="legend">
+        <span class="chip red">red</span> far off
+        <span class="chip yellow">yellow</span> close
+        <span class="chip green">green</span> very close
+        <span class="chip exact">&#10003;</span> exact
+      </p>
+      <p class="note">
+        Each channel tightens as you get closer: a yellow result halves the
+        thresholds for that channel, green (or exact) quarters them.
+      </p>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

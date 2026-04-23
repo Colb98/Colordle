@@ -1,0 +1,216 @@
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  padding: 1rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #161616;
+  color: #e8e8e8;
+  line-height: 1.4;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  letter-spacing: 0.02em;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.85;
+}
+
+button, input[type="number"], input[type="text"] {
+  font: inherit;
+  color: inherit;
+  background: #262626;
+  border: 1px solid #3d3d3d;
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+}
+
+input[type="number"] { width: 4.5rem; }
+input[type="text"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  width: 7rem;
+  text-transform: lowercase;
+}
+input[type="text"].invalid { border-color: #c44; }
+
+button {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+button:hover:not(:disabled) { background: #333; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.target { text-align: center; margin-bottom: 1.25rem; }
+
+.swatch {
+  width: 100%;
+  height: 180px;
+  border-radius: 10px;
+  border: 2px solid #2a2a2a;
+  box-shadow: inset 0 0 0 1px #0006;
+}
+
+.swatch.small {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.counter {
+  margin: 0.6rem 0 0;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.input {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background: #1d1d1d;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+}
+
+.input input[type="color"] {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #3d3d3d;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.guess-preview {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #3d3d3d;
+  border-radius: 6px;
+  background: #808080;
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem;
+  background: #1d1d1d;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.row .hex {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  min-width: 5rem;
+}
+
+.channels {
+  display: flex;
+  gap: 0.35rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.channel {
+  padding: 0.4rem 0.55rem;
+  border-radius: 5px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 3.8rem;
+  text-align: center;
+}
+
+.channel.red    { background: #d64545; color: #fff; }
+.channel.yellow { background: #e2b93b; color: #1a1a1a; }
+.channel.green  { background: #46b04a; color: #0a0a0a; }
+.channel.exact  { background: #1fd17a; color: #0a0a0a; box-shadow: 0 0 0 2px #fff8; }
+
+.chip {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 0 0.15rem 0 0.6rem;
+  vertical-align: middle;
+}
+.chip.red    { background: #d64545; color: #fff; }
+.chip.yellow { background: #e2b93b; color: #1a1a1a; }
+.chip.green  { background: #46b04a; color: #0a0a0a; }
+.chip.exact  { background: #1fd17a; color: #0a0a0a; }
+
+.result {
+  background: #1d1d1d;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.result h2 { margin: 0 0 0.5rem; }
+.result .reveal {
+  display: inline-block;
+  width: 32px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid #444;
+  vertical-align: middle;
+  margin: 0 0.3rem;
+}
+
+footer {
+  margin-top: 1.5rem;
+  font-size: 0.82rem;
+  opacity: 0.7;
+}
+.legend, .note { margin: 0.3rem 0; }
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.4rem; }
+  .swatch { height: 140px; }
+  .channels { margin-left: 0; }
+}
