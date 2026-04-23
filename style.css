@@ -254,6 +254,22 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   margin-top: 0.1rem;
 }
 
+.nearness {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 5px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  min-width: 3.2rem;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px #0004;
+}
+
 .channel.red    { background: #d64545; color: #fff; }
 .channel.yellow { background: #e2b93b; color: #1a1a1a; }
 .channel.green  { background: #46b04a; color: #0a0a0a; }

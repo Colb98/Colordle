@@ -140,6 +140,16 @@
     ];
   }
 
+  const MAX_DIST = Math.sqrt(3) * 255;
+
+  function nearnessPct(guess, target) {
+    const dr = guess[0] - target[0];
+    const dg = guess[1] - target[1];
+    const db = guess[2] - target[2];
+    const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+    return Math.round((1 - dist / MAX_DIST) * 100);
+  }
+
   function classify(delta, t) {
     if (delta === 0) return 'exact';
     if (delta <= t.green) return 'green';
@@ -308,6 +318,18 @@
         channels.appendChild(block);
       });
       row.appendChild(channels);
+
+      const isIncorrect = g.channels.some((c) => c.result !== 'exact');
+      if (isIncorrect) {
+        const pct = nearnessPct(g.rgb, state.target);
+        const near = document.createElement('span');
+        near.className = 'nearness';
+        near.style.background = `hsl(${pct * 1.2}, 58%, 38%)`;
+        near.textContent = `${pct}%`;
+        near.title = `Color nearness: 100% = exact, 0% = opposite corner of the RGB cube (e.g. white vs black)`;
+        row.appendChild(near);
+      }
+
       history.appendChild(row);
     });
 
